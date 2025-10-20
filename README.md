@@ -25,11 +25,13 @@ The "Rainbow" paper demonstrated that combining several independent improvements
 
 ## **Code Structure**
 
-The project is organized into three main files:
+The project is organized into the following files:
 
-* DQN.py: The main script for training and evaluating the agent. It contains the training loop, environment setup, hyperparameter definitions, and logging logic.  
-* model.py: Defines the DQN class, which is a convolutional neural network (CNN) based on the architecture used in the original DeepMind paper.  
-* utils.py: Contains the ReplayMemory and SumTree classes, which together provide a sophisticated implementation of Prioritized Experience Replay.
+* `main.py`: The main script for training and evaluating the agent. It contains the training loop, hyperparameter definitions, and logging logic.
+* `agent.py`: Defines the `Agent` class, which manages the policy and target networks, action selection (epsilon-greedy), and the model update (loss calculation) logic.
+* `environment.py`: Defines the `Environment` class, which wraps the Gymnasium environment to handle frame stacking, grayscale conversion, and reward clipping.
+* `model.py`: Defines the `DQN` class, which is the convolutional neural network (CNN) based on the architecture used in the original DeepMind paper.
+* `Memory.py`: Contains the `ReplayMemory` and `SumTree` classes, which together provide the full implementation of Prioritized Experience Replay.
 
 ## Installation
 
@@ -56,26 +58,33 @@ To get started, clone the repository and install the required dependencies.
 
 ### **Training the Agent**
 
-All hyperparameters and settings are configured directly within DQN.py. To start training, simply run the script:
+All hyperparameters and settings are configured directly within `main.py`. To start training, simply run the script:
 
-python DQN.py
+```bash
+python main.py
+```
 
 * **Logs:** Training progress, including loss and evaluation metrics, will be saved in the experiments/per\_ddqn\_experiment\_1 directory.  
 * **Checkpoints:** The model will be saved periodically to a file named Breakout\_checkpoint.tar.
 
 ### **Resuming Training**
 
-The script is configured by default to resume from the last saved checkpoint. To start a fresh training run, you can modify the last line of DQN.py from:
-```bash
-# Resumes training from a checkpoint  
-train(True, "Breakout\_checkpoint.tar")
-```
+The `train` function in `main.py` is set up to handle resuming. To control this, modify the **last line** of `main.py`.
 
-to:
-```bash
-# Starts a new training session  
-train(False)
-```
+* **To start a new training session** (this is the current default):
+    ```python
+    # Set resume=False or omit it
+    train(resume=False, checkpoint_path="Breakout_checkpoint.tar")
+    
+    # Or as it is now (since resume defaults to False):
+    # train(checkpoint_path="Breakout_checkpoint.tar")
+    ```
+
+* **To resume training from a checkpoint:**
+    ```python
+    # Set resume=True
+    train(resume=True, checkpoint_path="Breakout_checkpoint.tar")
+    ```
 
 ### **Monitoring with TensorBoard**
 
@@ -101,21 +110,21 @@ The network is a CNN that takes a stack of 4 grayscale frames (84x84) as input. 
 | Linear | 256 | \- | \- | ReLU |
 | Linear | 4 (Action Space) | \- | \- | None |
 
-### **Prioritized Experience Replay (utils.py)**
+### **Prioritized Experience Replay (Memory.py)**
 
-The ReplayMemory class uses a SumTree to enable efficient sampling of experiences based on their priority (TD-error). The sample method is particularly noteworthy as it:
+The `ReplayMemory` class uses a `SumTree` to enable efficient sampling of experiences based on their priority (TD-error). The `sample` method is particularly noteworthy as it:
 
-* Performs proportional sampling based on calculated priorities.  
-* Computes importance-sampling (IS) weights to correct for the bias introduced by prioritized sampling.  
-* Correctly assembles stacks of 4 frames for both state and next\_state, carefully handling episode boundaries by masking frames that cross into a new episode.
+* Performs proportional sampling based on calculated priorities.
+* Computes importance-sampling (IS) weights to correct for the bias introduced by prioritized sampling.
+* Correctly assembles stacks of 4 frames for both `state` and `next_state`, carefully handling episode boundaries by masking frames that cross into a new episode.
 
-### **DDQN \+ PER Loss Calculation (DQN.py)**
+### **DDQN + PER Loss Calculation (agent.py)**
 
-The calculate\_loss function is where the DDQN and PER components merge:
+The `update_model` method in the `Agent` class is where the DDQN and PER components merge:
 
-1. **DDQN:** It uses the policy\_network to *select* the best action for the next state but uses the target\_network to *evaluate* the Q-value of that action. This prevents the upward bias common in standard Q-learning.  
-2. **PER:** The calculated importance-sampling weights (wi) from the replay buffer are applied to the Huber loss, ensuring that the gradient updates are scaled appropriately.  
-3. **Priority Updates:** After the loss is calculated, the new TD-errors are used to update the priorities of the sampled experiences in the SumTree.
+1.  **DDQN:** It uses the `policy_network` to *select* the best action for the next state but uses the `target_network` to *evaluate* the Q-value of that action. This prevents the upward bias common in standard Q-learning.
+2.  **PER:** The calculated importance-sampling weights (`wi`) from the replay buffer are applied to the Huber loss, ensuring that the gradient updates are scaled appropriately.
+3.  **Priority Updates:** After the loss is calculated, the new TD-errors are used to update the priorities of the sampled experiences in the `SumTree`.
 
 ## Paper References
 
