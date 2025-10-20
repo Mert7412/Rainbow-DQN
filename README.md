@@ -15,13 +15,13 @@ The "Rainbow" paper demonstrated that combining several independent improvements
 
 ### **Implemented Features**
 
-* \[✅\] **Base DQN (2015):** The foundational algorithm using a deep neural network, experience replay, and a target network.  
-* \[✅\] **Double Q-Learning (DDQN):** Reduces the overestimation bias of Q-values by decoupling action selection (using the online network) from value evaluation (using the target network). This is implemented in the calculate\_loss function.  
-* \[✅\] **Prioritized Experience Replay (PER):** Instead of uniform sampling, this agent prioritizes transitions with a high TD-error, leading to significantly more efficient learning. This is implemented in utils.py using a SumTree data structure and is integrated into the training loop with importance-sampling weights.  
-* \[⬜️\] **Dueling Network Architecture**  
-* \[⬜️\] **Multi-step Learning**  
-* \[⬜️\] **Distributional Q-Learning (C51)**  
-* \[⬜️\] **Noisy Nets for Exploration**
+* [✅] **Base DQN (2015):** The foundational algorithm using a deep neural network, experience replay, and a target network.
+* [✅] **Double Q-Learning (DDQN):** Reduces the overestimation bias of Q-values by decoupling action selection (using the online network) from value evaluation (using the target network). This is implemented in the `update_model` method of `agent.py`.
+* [✅] **Prioritized Experience Replay (PER):** Instead of uniform sampling, this agent prioritizes transitions with a high TD-error, leading to significantly more efficient learning. This is implemented in `Memory.py` using a `SumTree` data structure and is integrated into the training loop with importance-sampling weights.
+* [⬜️] **Dueling Network Architecture**
+* [⬜️] **Multi-step Learning**
+* [⬜️] **Distributional Q-Learning (C51)**
+* [⬜️] **Noisy Nets for Exploration**
 
 ## **Code Structure**
 
